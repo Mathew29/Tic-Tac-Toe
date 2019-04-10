@@ -1,0 +1,35 @@
+
+
+.col-lg-4 {
+  border-right: solid black;
+  border-top: solid black;
+  height: 100px;
+  text-align:center;
+  font-size: 60px;
+}
+
+.top {
+  border-top:none;
+}
+
+.right {
+  border-right: none;
+}
+
+.container{
+  width: 500px;
+}
+
+button{
+  width: 250px;
+  margin: 24px;
+}
+
+.gameover {
+  text-align: center;
+
+}
+
+.scoreBoard {
+  float: left;
+}
