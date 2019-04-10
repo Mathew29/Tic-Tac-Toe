@@ -15,11 +15,11 @@ function Gameboard(){
     [0,1,2
     ,3,4,5,
     6,7,8],
-    this.player1 = new Player("X"),
-    this.player2 = new Player("O"),
-    this.over = false,
-    this.turns = 0,
-    this.player1.active = true;
+  this.player1 = new Player("X"),
+  this.player2 = new Player("O"),
+  this.over = false,
+  this.turns = 0,
+  this.player1.active = true;
 }
 
 Gameboard.prototype.checkWin = function(num){
@@ -27,7 +27,6 @@ Gameboard.prototype.checkWin = function(num){
   var winCheck = winCombos.filter(function(ar) {
     return ar.includes(num);
   })
-  console.log(winCheck);
   winCheck.forEach(function(ar) {
   if (gameBoard.board[ar[0]] === gameBoard.board[ar[1]] && gameBoard.board[ar[0]] === gameBoard.board[ar[2]]){
     gameBoard.over = true;
@@ -53,6 +52,88 @@ Gameboard.prototype.getActive = function(){
   }
 }
 
+Gameboard.prototype.checkAIWin = function(avail){
+var move = -1;
+  avail.forEach(function(ar){
+    var winCheck = winCombos.filter(function(a) {
+      return a.includes(ar);
+    })
+    winCheck.forEach(function(a){
+      var count = 0;
+      if(gameBoard.board[a[0]]==='O'){
+        count++;
+      }
+      if(gameBoard.board[a[1]]==='O'){
+        count++;
+      }
+      if(gameBoard.board[a[2]]==='O'){
+        count++;
+      }
+      if(count === 2)
+      {
+        move = ar;
+      }
+    })
+  })
+  if(move>=0)
+  {
+    aiWins();
+  }
+return move;
+}
+
+Gameboard.prototype.checkAIBlock = function(avail){
+  var move = -1;
+    avail.forEach(function(ar){
+      var winCheck = winCombos.filter(function(a) {
+        return a.includes(ar);
+      })
+      winCheck.forEach(function(a){
+        var count = 0;
+        if(gameBoard.board[a[0]]==='X'){
+          count++;
+        }
+        if(gameBoard.board[a[1]]==='X'){
+          count++;
+        }
+        if(gameBoard.board[a[2]]==='X'){
+          count++;
+        }
+        if(count === 2)
+        {
+          move = ar;
+        }
+      })
+    })
+  return move;
+}
+
+Gameboard.prototype.aiMove = function () {
+  var move = -1; //before there is a move
+  gameBoard.swapActive();
+  var available = this.board.filter(function(ar) {
+    return !(isNaN(ar));
+  })
+  if(move < 0){
+    move = gameBoard.checkAIWin(available);
+  }
+
+  if(move<0){
+    move = gameBoard.checkAIBlock(available);
+
+  }
+  if (available.includes(4) && move < 0){
+    move = 4;
+
+  }
+  if(move<0){
+    var theMove = Math.floor(Math.random() * available.length);
+    move = available[theMove];
+  }
+    gameBoard.board[move] = 'O';
+    gameBoard.checkWin(move);
+    return move;
+};
 function Player(letter){
   this.letter = letter,
   this.active = false,
@@ -83,12 +164,20 @@ function attachListeners() {
       }else{
         score.owins++;
         $('.'+active.letter+'win').empty();
-        $('.'+active.letter+'win').append("<h3 class="+active.letter+"win'>X: "+score.owins+ "</h3>");
+        $('.'+active.letter+'win').append("<h3 class="+active.letter+"win'>O: "+score.owins+ "</h3>");
       }
     }else if(gameBoard.turns === 9){
       $('.gameover').append('<h1>Nobody wins!</h1>');
     }
+
+    if(gameBoard.player2.ai===true && gameBoard.over === false){
+      var aiMove = gameBoard.aiMove();
+      $('#'+aiMove).append('O');
+      $('#'+aiMove).removeClass('click');
+
+    }
     $(this).removeClass('click');
+
   }
 
   });
@@ -97,14 +186,24 @@ function attachListeners() {
     $('.col-lg-4').empty();
     $('.gameover').empty();
     gameBoard = new Gameboard;
+    gameBoard.player2.ai=false;
   });
-  // $("#buttons").on("click", ".deleteButton", function() {
-  //   addressBook.deleteContact(this.id);
-  //   $("#show-contact").hide();
-  //   displayContactDetails(addressBook);
-  // });
+  $(".container").on("click", ".ai", function() {
+    $('.col-lg-4').addClass('click');
+    $('.col-lg-4').empty();
+    $('.gameover').empty();
+    gameBoard = new Gameboard;
+    gameBoard.player2.ai=true;
+  });
+
 };
 
 $(document).ready(function() {
   attachListeners();
+  aiWins = function(){
+    score.owins++;
+    $('.Owin').empty();
+    $('.Owin').append("<h3 class='Owin'>O: "+score.owins+ "</h3>");
+    $('.gameover').append('<h1>You, Stupid Human Lost!</h1>');
+  }
 })
